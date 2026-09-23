@@ -1,6 +1,6 @@
-# [Project name]
+# Astoria Circular Exchange
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Astoria Circular Exchange helps local businesses turn useful leftover materials into nearby resources through transparent matching.
 
 ## Run & Operate
 
@@ -22,15 +22,25 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/astoria-exchange/src/` — React dashboard, match list, profile flow, and shared shell
+- `artifacts/api-server/src/routes/ecosystem.ts` — dashboard, business profile, match ranking, and pickup request API
+- `lib/api-spec/openapi.yaml` — source-of-truth API contract
+- `lib/db/src/schema/businesses.ts` — business profiles and match requests
+- `artifacts/astoria-exchange/src/index.css` — civic utility visual system and theme tokens
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Match scores are always decomposed into material compatibility (40), distance (40), and pickup timing (20) so businesses can understand why a match ranks well.
+- The first pilot is seeded with Astoria businesses and keeps the current business as the first seeded profile, making the exchange legible on first open.
+- Addresses are stored as business data and the first pilot uses neighborhood-aware distance estimates; production geocoding can replace the estimator without changing the match response shape.
+- API contracts are generated from OpenAPI and shared between the Express service and React Query client.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- See an impact overview for the current business, including local partners and materials diverted.
+- Browse ranked matches with material, distance, timing, and total score breakdowns.
+- Request a pickup from an available partner and see the match status update.
+- Create or update a business profile with waste, wanted material, quantity, address, and pickup timing.
 
 ## User preferences
 
@@ -38,7 +48,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run API codegen after editing `lib/api-spec/openapi.yaml`.
+- Restart `artifacts/api-server: API Server` and `artifacts/astoria-exchange: web` after backend or frontend changes.
+- The Vite build expects workflow-provided `PORT` and `BASE_PATH`; use the artifact workflow for preview verification.
 
 ## Pointers
 

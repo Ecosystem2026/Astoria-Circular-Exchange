@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: ecosystem
+    description: Astoria circular exchange operations
 paths:
   /healthz:
     get:
@@ -24,7 +26,136 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [ecosystem]
+      summary: Get the current business dashboard
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /businesses:
+    get:
+      operationId: listBusinesses
+      tags: [ecosystem]
+      summary: List businesses participating in the exchange
+      responses:
+        "200":
+          description: Businesses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Business"
+    post:
+      operationId: createBusiness
+      tags: [ecosystem]
+      summary: Create a participating business profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessInput"
+      responses:
+        "201":
+          description: Created business
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+  /businesses/{businessId}:
+    get:
+      operationId: getBusiness
+      tags: [ecosystem]
+      summary: Get a business profile
+      parameters:
+        - $ref: "#/components/parameters/BusinessId"
+      responses:
+        "200":
+          description: Business
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+        "404":
+          description: Business not found
+    patch:
+      operationId: updateBusiness
+      tags: [ecosystem]
+      summary: Update a participating business profile
+      parameters:
+        - $ref: "#/components/parameters/BusinessId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessUpdate"
+      responses:
+        "200":
+          description: Updated business
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Business"
+        "404":
+          description: Business not found
+  /businesses/{businessId}/matches:
+    get:
+      operationId: listMatches
+      tags: [ecosystem]
+      summary: List ranked circular exchange matches for a business
+      parameters:
+        - $ref: "#/components/parameters/BusinessId"
+      responses:
+        "200":
+          description: Ranked matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+  /matches/{matchId}/request:
+    post:
+      operationId: requestMatch
+      tags: [ecosystem]
+      summary: Request a pickup match
+      parameters:
+        - $ref: "#/components/parameters/MatchId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchRequestInput"
+      responses:
+        "200":
+          description: Updated match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
 components:
+  parameters:
+    BusinessId:
+      name: businessId
+      in: path
+      required: true
+      schema:
+        type: integer
+    MatchId:
+      name: matchId
+      in: path
+      required: true
+      schema:
+        type: integer
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +164,190 @@ components:
           type: string
       required:
         - status
+    Business:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - address
+        - neighborhood
+        - wasteMaterial
+        - wasteQuantity
+        - wantedMaterial
+        - pickupWindow
+        - initials
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        address:
+          type: string
+        neighborhood:
+          type: string
+        wasteMaterial:
+          type: string
+        wasteQuantity:
+          type: string
+        wantedMaterial:
+          type: string
+        pickupWindow:
+          type: string
+        initials:
+          type: string
+    BusinessInput:
+      type: object
+      required:
+        - name
+        - type
+        - address
+        - wasteMaterial
+        - wasteQuantity
+        - wantedMaterial
+        - pickupWindow
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        address:
+          type: string
+        wasteMaterial:
+          type: string
+        wasteQuantity:
+          type: string
+        wantedMaterial:
+          type: string
+        pickupWindow:
+          type: string
+    BusinessUpdate:
+      type: object
+      required:
+        - name
+        - type
+        - address
+        - wasteMaterial
+        - wasteQuantity
+        - wantedMaterial
+        - pickupWindow
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        address:
+          type: string
+        wasteMaterial:
+          type: string
+        wasteQuantity:
+          type: string
+        wantedMaterial:
+          type: string
+        pickupWindow:
+          type: string
+    Match:
+      type: object
+      required:
+        - id
+        - partner
+        - score
+        - compatibilityScore
+        - distanceScore
+        - timingScore
+        - distance
+        - route
+        - material
+        - quantity
+        - pickupWindow
+        - status
+      properties:
+        id:
+          type: integer
+        partner:
+          $ref: "#/components/schemas/Business"
+        score:
+          type: integer
+        compatibilityScore:
+          type: integer
+        distanceScore:
+          type: integer
+        timingScore:
+          type: integer
+        distance:
+          type: string
+        route:
+          type: string
+        material:
+          type: string
+        quantity:
+          type: string
+        pickupWindow:
+          type: string
+        status:
+          type: string
+          enum: [available, requested, confirmed]
+    Dashboard:
+      type: object
+      required:
+        - currentBusiness
+        - matches
+        - stats
+        - activity
+      properties:
+        currentBusiness:
+          $ref: "#/components/schemas/Business"
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/Match"
+        stats:
+          $ref: "#/components/schemas/DashboardStats"
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    DashboardStats:
+      type: object
+      required:
+        - activeMatches
+        - divertedThisMonth
+        - localPartners
+        - wasteAvoided
+      properties:
+        activeMatches:
+          type: integer
+        divertedThisMonth:
+          type: string
+        localPartners:
+          type: integer
+        wasteAvoided:
+          type: string
+    Activity:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - time
+        - kind
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        time:
+          type: string
+        kind:
+          type: string
+          enum: [match, impact, pickup, profile]
+    MatchRequestInput:
+      type: object
+      properties:
+        note:
+          type: string
 

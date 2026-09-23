@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Astoria Circular Exchange"
+description = "A neighborhood materials exchange for Astoria businesses to turn waste into useful resources through transparent compatibility, distance, and pickup-time matching."
+version = "1.0.0"
+id = "artifacts/astoria-exchange"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19057
+
+[services.development]
+run = "pnpm --filter @workspace/astoria-exchange run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/astoria-exchange", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/astoria-exchange/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19057"
+BASE_PATH = "/"
