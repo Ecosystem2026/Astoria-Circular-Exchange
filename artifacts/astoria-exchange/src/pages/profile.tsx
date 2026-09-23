@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useLocation } from 'wouter';
 import { z } from 'zod';
 import { getGetBusinessQueryKey, getGetDashboardQueryKey, getListBusinessesQueryKey, useCreateBusiness, useGetBusiness, useGetDashboard, useListBusinesses, useUpdateBusiness } from '@workspace/api-client-react';
-import { Check, CircleHelp, MapPin, Save, Store, UsersRound } from 'lucide-react';
+import { ArrowLeft, Check, CircleHelp, MapPin, Plus, Save, Store, UsersRound } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -32,13 +32,14 @@ export default function ProfilePage() {
   const createBusiness = useCreateBusiness();
   const updateBusiness = useUpdateBusiness();
   const [saved, setSaved] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const initialized = useRef(false);
   const business = businessDetail.data ?? dashboard.data?.currentBusiness;
   const form = useForm<ProfileValues>({ resolver: zodResolver(profileSchema), defaultValues: emptyProfile });
   const partnerCount = businesses.data?.length ?? dashboard.data?.stats.localPartners ?? 0;
 
   useEffect(() => {
-    if (business && !initialized.current) {
+    if (business && !initialized.current && !isCreating) {
       initialized.current = true;
       form.reset({
         name: business.name,
@@ -50,7 +51,20 @@ export default function ProfilePage() {
         pickupWindow: business.pickupWindow,
       });
     }
-  }, [business, form]);
+  }, [business, form, isCreating]);
+
+  const startCreating = () => {
+    setSaved(false);
+    setIsCreating(true);
+    initialized.current = true;
+    form.reset(emptyProfile);
+  };
+
+  const returnToCurrentProfile = () => {
+    setSaved(false);
+    setIsCreating(false);
+    initialized.current = false;
+  };
 
   const onSaved = (values: ProfileValues, nextId?: number) => {
     setSaved(true);
@@ -64,7 +78,7 @@ export default function ProfilePage() {
 
   const onSubmit = (values: ProfileValues) => {
     setSaved(false);
-    if (businessId > 0) {
+    if (businessId > 0 && !isCreating) {
       updateBusiness.mutate({ businessId, data: values }, {
         onSuccess: (nextBusiness) => onSaved(values, nextBusiness.id),
       });
@@ -91,8 +105,18 @@ export default function ProfilePage() {
         <section className="animate-rise-in">
           <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">Make the handoff legible</p>
           <div className="mt-3 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-            <div><h1 data-testid="text-profile-heading" className="font-display text-[42px] leading-none tracking-[-.035em] sm:text-[54px]">Your exchange profile</h1><p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-muted-foreground">A little context makes a better match. Tell Astoria what you have, what you need, and when a neighbor can reach you.</p></div>
-            <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-[11px] font-semibold text-muted-foreground"><UsersRound size={14} className="text-primary" /> {partnerCount} local partners nearby</div>
+            <div>
+              <h1 data-testid="text-profile-heading" className="font-display text-[42px] leading-none tracking-[-.035em] sm:text-[54px]">{isCreating ? 'Join the exchange' : 'Your exchange profile'}</h1>
+              <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-muted-foreground">{isCreating ? 'Create a separate test profile and see how its materials connect with the Astoria network.' : 'A little context makes a better match. Tell Astoria what you have, what you need, and when a neighbor can reach you.'}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-[11px] font-semibold text-muted-foreground"><UsersRound size={14} className="text-primary" /> {partnerCount} local partners nearby</div>
+              {isCreating ? (
+                <button type="button" onClick={returnToCurrentProfile} className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[11px] font-bold text-foreground transition-colors hover:bg-muted"><ArrowLeft size={13} /> My profile</button>
+              ) : (
+                <button type="button" onClick={startCreating} data-testid="button-join-business" className="focus-ring inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[11px] font-bold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-[0_5px_14px_hsl(var(--primary)/.25)]"><Plus size={13} /> Join as another business</button>
+              )}
+            </div>
           </div>
         </section>
 
@@ -118,7 +142,9 @@ export default function ProfilePage() {
               <p className="mt-3 text-[12px] leading-relaxed text-secondary-foreground/70">“Some grounds” is hard to plan around. “18 kg every week, after 2 pm” gives a neighbor a real reason to say yes.</p>
               <div className="mt-5 border-t border-secondary-foreground/15 pt-4 text-[11px] leading-relaxed text-secondary-foreground/65"><MapPin size={14} className="mb-2 text-primary" /> Astoria businesses are matched by material fit, distance, and a pickup time that respects the workday.</div>
             </div>
-            {business && <div className="rounded-2xl border border-card-border bg-card p-5 shadow-[var(--shadow-sm)]"><p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-primary">Current location</p><p data-testid="text-profile-location" className="mt-3 text-[13px] font-bold">{business.address}</p><p className="mt-1 text-[11px] text-muted-foreground">{business.neighborhood}, Queens</p><button type="button" data-testid="button-back-dashboard" onClick={() => setLocation('/')} className="focus-ring mt-4 inline-flex items-center text-[11px] font-bold text-primary hover:underline">Back to overview</button></div>}
+            {isCreating ? (
+              <div className="rounded-2xl border border-card-border bg-card p-5 shadow-[var(--shadow-sm)]"><p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-primary">Test network mode</p><p className="mt-3 text-[13px] font-bold">This creates a separate local business profile.</p><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">It will appear in the match list for the Astoria pilot. No login is required in this testing version.</p></div>
+            ) : business && <div className="rounded-2xl border border-card-border bg-card p-5 shadow-[var(--shadow-sm)]"><p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-primary">Current location</p><p data-testid="text-profile-location" className="mt-3 text-[13px] font-bold">{business.address}</p><p className="mt-1 text-[11px] text-muted-foreground">{business.neighborhood}, Queens</p><button type="button" data-testid="button-back-dashboard" onClick={() => setLocation('/')} className="focus-ring mt-4 inline-flex items-center text-[11px] font-bold text-primary hover:underline">Back to overview</button></div>}
           </aside>
         </div>
       </div>
