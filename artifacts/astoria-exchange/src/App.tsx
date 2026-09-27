@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { HelpChat } from '@/components/help-chat';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
@@ -44,6 +45,7 @@ function App() {
           <Router />
         </WouterRouter>
         <Toaster />
+        <HelpChat />
       </TooltipProvider>
     </QueryClientProvider>
   );
