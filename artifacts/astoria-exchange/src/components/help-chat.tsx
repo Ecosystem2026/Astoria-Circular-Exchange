@@ -19,6 +19,10 @@ const starterMessage =
 function answerQuestion(question: string): string {
   const text = question.toLowerCase();
 
+  if (/\b67\b/.test(text)) {
+    return '67';
+  }
+
   if (/(score|points|rating|match percentage|100)/.test(text)) {
     return 'Every match is scored out of 100 points: material compatibility is worth 40, distance is worth 40, and pickup timing is worth 20. Open a match card to see the three-part breakdown.';
   }
