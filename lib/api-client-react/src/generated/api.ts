@@ -708,3 +708,77 @@ export const useRequestMatch = <TError = ErrorType<unknown>,
       return useMutation(getRequestMatchMutationOptions(options));
     }
 
+export const getCancelMatchRequestUrl = (matchId: number,) => {
+
+
+
+
+  return `/api/matches/${matchId}/request`
+}
+
+/**
+ * @summary Cancel a pickup match request
+ */
+export const cancelMatchRequest = async (matchId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getCancelMatchRequestUrl(matchId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getCancelMatchRequestMutationKey = () => ['cancelMatchRequest'] as const;
+
+export const getCancelMatchRequestMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelMatchRequest>>, TError,CancelMatchRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelMatchRequest>>, TError,CancelMatchRequestMutationVariables, TContext> => {
+
+const mutationKey = getCancelMatchRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelMatchRequest>>, CancelMatchRequestMutationVariables> = (props) => {
+          const {matchId} = props ?? {};
+
+          return  cancelMatchRequest(matchId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelMatchRequestMutationResult = NonNullable<Awaited<ReturnType<typeof cancelMatchRequest>>>
+
+    export type CancelMatchRequestMutationError = ErrorType<void>
+    export type CancelMatchRequestMutationVariables = {matchId: number}
+
+    /**
+ * @summary Cancel a pickup match request
+ */
+export const useCancelMatchRequest = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelMatchRequest>>, TError,CancelMatchRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cancelMatchRequest>>,
+        TError,
+        CancelMatchRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelMatchRequestMutationOptions(options));
+    }
+

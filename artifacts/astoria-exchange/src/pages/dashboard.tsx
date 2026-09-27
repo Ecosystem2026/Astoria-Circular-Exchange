@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { ActivityKind, getGetDashboardQueryKey, useGetDashboard, useRequestMatch } from '@workspace/api-client-react';
+import { ActivityKind, getGetDashboardQueryKey, useCancelMatchRequest, useGetDashboard, useRequestMatch } from '@workspace/api-client-react';
 import { ArrowRight, CalendarDays, CheckCircle2, Leaf, MapPinned, PackageCheck, RefreshCw, Sparkles } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { MatchCard } from '@/components/match-card';
@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
   const dashboard = useGetDashboard({ query: { staleTime: 20000, queryKey: getGetDashboardQueryKey() } });
   const requestMatch = useRequestMatch();
+  const cancelMatchRequest = useCancelMatchRequest();
   const [requestedIds, setRequestedIds] = useState<number[]>([]);
   const [pendingId, setPendingId] = useState<number | null>(null);
 
@@ -18,6 +19,18 @@ export default function DashboardPage() {
     requestMatch.mutate({ matchId, data: {} }, {
       onSuccess: () => {
         setRequestedIds((ids) => [...ids, matchId]);
+        setPendingId(null);
+        void queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+      },
+      onError: () => setPendingId(null),
+    });
+  };
+
+  const cancel = (matchId: number) => {
+    setPendingId(matchId);
+    cancelMatchRequest.mutate({ matchId }, {
+      onSuccess: () => {
+        setRequestedIds((ids) => ids.filter((id) => id !== matchId));
         setPendingId(null);
         void queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
       },
@@ -61,7 +74,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-3">
                   {dashboard.data.matches.slice(0, 3).map((match) => (
-                    <MatchCard key={match.id} match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} pending={pendingId === match.id} />
+                    <MatchCard key={match.id} match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} onCancel={() => cancel(match.id)} pending={pendingId === match.id} />
                   ))}
                   {dashboard.data.matches.length === 0 && <EmptyMatches />}
                 </div>

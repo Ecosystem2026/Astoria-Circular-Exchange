@@ -142,6 +142,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Match"
+    delete:
+      operationId: cancelMatchRequest
+      tags: [ecosystem]
+      summary: Cancel a pickup match request
+      parameters:
+        - $ref: "#/components/parameters/MatchId"
+      responses:
+        "204":
+          description: Pickup request cancelled
+        "404":
+          description: Pickup request not found
 components:
   parameters:
     BusinessId:

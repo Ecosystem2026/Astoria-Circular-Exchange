@@ -430,4 +430,32 @@ router.post("/matches/:matchId/request", async (req, res): Promise<void> => {
   res.json(RequestMatchResponse.parse({ ...match, status: "requested" }));
 });
 
+router.delete("/matches/:matchId/request", async (req, res): Promise<void> => {
+  const parsedParams = RequestMatchParams.safeParse(req.params);
+  if (!parsedParams.success) {
+    res.status(400).json({ error: "Invalid match request" });
+    return;
+  }
+
+  const matchId = parsedParams.data.matchId;
+  const businessId = Math.floor(matchId / 1000);
+  const partnerId = matchId % 1000;
+  const [deleted] = await db
+    .delete(matchRequestsTable)
+    .where(
+      and(
+        eq(matchRequestsTable.businessId, businessId),
+        eq(matchRequestsTable.partnerId, partnerId),
+      ),
+    )
+    .returning({ id: matchRequestsTable.id });
+
+  if (!deleted) {
+    res.status(404).json({ error: "Pickup request not found" });
+    return;
+  }
+
+  res.sendStatus(204);
+});
+
 export default router;

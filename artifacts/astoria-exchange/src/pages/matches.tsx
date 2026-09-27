@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getGetDashboardQueryKey, getListMatchesQueryKey, useGetDashboard, useListMatches, useRequestMatch } from '@workspace/api-client-react';
+import { getGetDashboardQueryKey, getListMatchesQueryKey, useCancelMatchRequest, useGetDashboard, useListMatches, useRequestMatch } from '@workspace/api-client-react';
 import { ArrowDownUp, Filter, RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { MatchCard } from '@/components/match-card';
@@ -11,6 +11,7 @@ export default function MatchesPage() {
   const businessId = dashboard.data?.currentBusiness.id ?? 0;
   const matches = useListMatches(businessId, { query: { enabled: businessId > 0, queryKey: getListMatchesQueryKey(businessId), staleTime: 20000 } });
   const requestMatch = useRequestMatch();
+  const cancelMatchRequest = useCancelMatchRequest();
   const [requestedIds, setRequestedIds] = useState<number[]>([]);
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [query, setQuery] = useState('');
@@ -28,6 +29,19 @@ export default function MatchesPage() {
     requestMatch.mutate({ matchId, data: {} }, {
       onSuccess: () => {
         setRequestedIds((ids) => [...ids, matchId]);
+        setPendingId(null);
+        void queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey(businessId) });
+        void queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+      },
+      onError: () => setPendingId(null),
+    });
+  };
+
+  const cancel = (matchId: number) => {
+    setPendingId(matchId);
+    cancelMatchRequest.mutate({ matchId }, {
+      onSuccess: () => {
+        setRequestedIds((ids) => ids.filter((id) => id !== matchId));
         setPendingId(null);
         void queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey(businessId) });
         void queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
@@ -64,7 +78,7 @@ export default function MatchesPage() {
         {(matches.isError || dashboard.isError) && <div className="mt-6"><ErrorMatches onRetry={() => void matches.refetch()} /></div>}
         {!matches.isLoading && !matches.isError && (
           <div className="mt-6 grid gap-3 lg:grid-cols-2">
-            {visibleMatches.map((match, index) => <div key={match.id} className={`animate-rise-in delay-${Math.min(index + 1, 4)}`}><MatchCard alwaysExpanded match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} pending={pendingId === match.id} /></div>)}
+            {visibleMatches.map((match, index) => <div key={match.id} className={`animate-rise-in delay-${Math.min(index + 1, 4)}`}><MatchCard alwaysExpanded match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} onCancel={() => cancel(match.id)} pending={pendingId === match.id} /></div>)}
             {visibleMatches.length === 0 && <EmptyState query={query} onClear={() => { setQuery(''); setFilter('all'); }} />}
           </div>
         )}

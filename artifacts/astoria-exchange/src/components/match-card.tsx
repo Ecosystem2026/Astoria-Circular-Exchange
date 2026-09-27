@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { Match } from '@workspace/api-client-react';
-import { Check, Clock3, MapPin, Package, Send } from 'lucide-react';
+import { Check, Clock3, MapPin, Package, Send, Undo2 } from 'lucide-react';
 
-type Props = { match: Match; onRequest: (match: Match) => void; pending?: boolean; compact?: boolean; alwaysExpanded?: boolean };
+type Props = { match: Match; onRequest: (match: Match) => void; onCancel?: (match: Match) => void; pending?: boolean; compact?: boolean; alwaysExpanded?: boolean };
 
-export function MatchCard({ match, onRequest, pending = false, compact = false, alwaysExpanded = false }: Props) {
+export function MatchCard({ match, onRequest, onCancel, pending = false, compact = false, alwaysExpanded = false }: Props) {
   const [expanded, setExpanded] = useState(false);
   const requested = match.status !== 'available';
   const score = Math.round(match.score);
@@ -49,7 +49,10 @@ export function MatchCard({ match, onRequest, pending = false, compact = false, 
       <div className={`${compact ? 'mt-4' : 'mt-5'} flex items-center justify-between gap-3 pl-2`}>
         <p className="truncate text-[11px] text-muted-foreground"><span className="font-semibold text-foreground/70">{match.route}</span></p>
         {requested ? (
-          <span data-testid={`status-match-${match.id}`} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent/40 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.1em] text-foreground"><Check size={12} /> {match.status}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span data-testid={`status-match-${match.id}`} className="inline-flex items-center gap-1.5 rounded-full bg-accent/40 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.1em] text-foreground"><Check size={12} /> {match.status}</span>
+            {onCancel && match.status === 'requested' && <button type="button" disabled={pending} onClick={() => onCancel(match)} data-testid={`button-cancel-match-${match.id}`} className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-extrabold text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive disabled:cursor-wait disabled:opacity-60">{pending ? 'Undoing…' : 'Undo request'} <Undo2 size={12} /></button>}
+          </div>
         ) : (
           <button type="button" disabled={pending} onClick={() => onRequest(match)} data-testid={`button-request-match-${match.id}`} className="focus-ring inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-[11px] font-extrabold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-[0_5px_14px_hsl(var(--primary)/.25)] disabled:cursor-wait disabled:opacity-60">
             {pending ? 'Sending…' : 'Request pickup'} <Send size={12} />

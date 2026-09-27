@@ -244,3 +244,13 @@ export const RequestMatchResponse = zod.object({
 })
 
 
+/**
+ * @summary Cancel a pickup match request
+ */
+export const CancelMatchRequestParams = zod.object({
+  "matchId": zod.coerce.number().int()
+})
+
+export const CancelMatchRequestResponse = zod.void()
+
+
