@@ -13,6 +13,8 @@ export interface Business {
   id: number;
   name: string;
   type: string;
+  /** @minItems 1 */
+  categories: string[];
   address: string;
   neighborhood: string;
   wasteMaterial: string;
@@ -25,6 +27,8 @@ export interface Business {
 export interface BusinessInput {
   name: string;
   type: string;
+  /** @minItems 1 */
+  categories: string[];
   address: string;
   wasteMaterial: string;
   wasteQuantity: string;
@@ -35,6 +39,8 @@ export interface BusinessInput {
 export interface BusinessUpdate {
   name: string;
   type: string;
+  /** @minItems 1 */
+  categories: string[];
   address: string;
   wasteMaterial: string;
   wasteQuantity: string;

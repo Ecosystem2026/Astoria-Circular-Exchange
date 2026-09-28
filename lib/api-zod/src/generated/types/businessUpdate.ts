@@ -9,6 +9,8 @@
 export interface BusinessUpdate {
   name: string;
   type: string;
+  /** @minItems 1 */
+  categories: string[];
   address: string;
   wasteMaterial: string;
   wasteQuantity: string;

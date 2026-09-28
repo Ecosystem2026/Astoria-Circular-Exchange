@@ -10,6 +10,8 @@ export interface Business {
   id: number;
   name: string;
   type: string;
+  /** @minItems 1 */
+  categories: string[];
   address: string;
   neighborhood: string;
   wasteMaterial: string;

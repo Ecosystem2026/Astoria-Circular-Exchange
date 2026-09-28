@@ -6,6 +6,10 @@ export const businessesTable = pgTable("businesses", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   type: text("type").notNull(),
+  categories: text("categories")
+    .array()
+    .notNull()
+    .default([]),
   address: text("address").notNull(),
   neighborhood: text("neighborhood").notNull().default("Astoria"),
   wasteMaterial: text("waste_material").notNull(),

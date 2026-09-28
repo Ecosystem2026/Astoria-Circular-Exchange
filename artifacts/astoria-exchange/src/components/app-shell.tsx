@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { Show, SignOutButton } from '@clerk/react';
 import { Link, useLocation } from 'wouter';
 import { getHealthCheckQueryKey, useHealthCheck } from '@workspace/api-client-react';
 import { ArrowRight, CircleUserRound, LayoutDashboard, Menu, Network, X } from 'lucide-react';
@@ -66,10 +67,20 @@ export function AppShell({ children }: { children: ReactNode }) {
               <p className="mt-0.5 text-[12px] font-semibold text-foreground/65">{activeLabel}</p>
             </div>
           </div>
-          <Link href="/profile" data-testid="link-header-profile" className="focus-ring flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5 text-[11px] font-bold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">
-            <span className="grid size-6 place-items-center rounded-full bg-accent text-[10px] font-extrabold text-accent-foreground">BC</span>
-            <span className="hidden sm:inline">Bean &amp; Bloom</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Show when="signed-out">
+              <Link href="/sign-up" data-testid="link-create-account" className="focus-ring rounded-full border border-border bg-card px-3 py-2 text-[11px] font-extrabold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">Create account</Link>
+            </Show>
+            <Show when="signed-in">
+              <SignOutButton>
+                <button type="button" data-testid="button-sign-out" className="focus-ring rounded-full border border-border bg-card px-3 py-2 text-[11px] font-extrabold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">Sign out</button>
+              </SignOutButton>
+            </Show>
+            <Link href="/profile" data-testid="link-header-profile" className="focus-ring flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5 text-[11px] font-bold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">
+              <span className="grid size-6 place-items-center rounded-full bg-accent text-[10px] font-extrabold text-accent-foreground">BC</span>
+              <span className="hidden sm:inline">Bean &amp; Bloom</span>
+            </Link>
+          </div>
         </header>
         {children}
       </main>

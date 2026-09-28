@@ -20,11 +20,16 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Get the current business dashboard
  */
+
+
+
+
 export const GetDashboardResponse = zod.object({
   "currentBusiness": zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -39,6 +44,7 @@ export const GetDashboardResponse = zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -77,10 +83,14 @@ export const GetDashboardResponse = zod.object({
 /**
  * @summary List businesses participating in the exchange
  */
+
+
+
 export const ListBusinessesResponseItem = zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -95,9 +105,13 @@ export const ListBusinessesResponse = zod.array(ListBusinessesResponseItem)
 /**
  * @summary Create a participating business profile
  */
+
+
+
 export const CreateBusinessBody = zod.object({
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
@@ -105,10 +119,14 @@ export const CreateBusinessBody = zod.object({
   "pickupWindow": zod.string()
 })
 
+
+
+
 export const CreateBusinessResponse = zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -126,10 +144,14 @@ export const GetBusinessParams = zod.object({
   "businessId": zod.coerce.number().int()
 })
 
+
+
+
 export const GetBusinessResponse = zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -147,9 +169,13 @@ export const UpdateBusinessParams = zod.object({
   "businessId": zod.coerce.number().int()
 })
 
+
+
+
 export const UpdateBusinessBody = zod.object({
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
@@ -157,10 +183,14 @@ export const UpdateBusinessBody = zod.object({
   "pickupWindow": zod.string()
 })
 
+
+
+
 export const UpdateBusinessResponse = zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -178,12 +208,16 @@ export const ListMatchesParams = zod.object({
   "businessId": zod.coerce.number().int()
 })
 
+
+
+
 export const ListMatchesResponseItem = zod.object({
   "id": zod.number().int(),
   "partner": zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),
@@ -217,12 +251,16 @@ export const RequestMatchBody = zod.object({
   "note": zod.string().optional()
 })
 
+
+
+
 export const RequestMatchResponse = zod.object({
   "id": zod.number().int(),
   "partner": zod.object({
   "id": zod.number().int(),
   "name": zod.string(),
   "type": zod.string(),
+  "categories": zod.array(zod.string()).min(1),
   "address": zod.string(),
   "neighborhood": zod.string(),
   "wasteMaterial": zod.string(),

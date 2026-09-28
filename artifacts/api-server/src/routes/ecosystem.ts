@@ -24,6 +24,7 @@ const seedBusinesses = [
   {
     name: "Astoria Coffee Lab",
     type: "Coffee shop",
+    categories: ["Coffee Shops"],
     address: "31-07 Ditmars Blvd",
     neighborhood: "Ditmars",
     wasteMaterial: "Coffee grounds",
@@ -35,6 +36,7 @@ const seedBusinesses = [
   {
     name: "The Garden School",
     type: "Community garden",
+    categories: ["Community Garden"],
     address: "29-15 Ditmars Blvd",
     neighborhood: "Ditmars",
     wasteMaterial: "Finished compost",
@@ -46,6 +48,7 @@ const seedBusinesses = [
   {
     name: "Borough Bakery",
     type: "Bakery",
+    categories: ["Bakery"],
     address: "31-19 23rd Ave",
     neighborhood: "Ditmars",
     wasteMaterial: "Cardboard boxes",
@@ -57,6 +60,7 @@ const seedBusinesses = [
   {
     name: "Mosaic Makers",
     type: "Maker studio",
+    categories: ["Artist"],
     address: "36-01 34th St",
     neighborhood: "Central Astoria",
     wasteMaterial: "Glass jars",
@@ -68,6 +72,7 @@ const seedBusinesses = [
   {
     name: "Raaka Chocolate",
     type: "Food producer",
+    categories: ["Other"],
     address: "39-01 Main Ave",
     neighborhood: "Ravenswood",
     wasteMaterial: "Cocoa husks",
@@ -106,10 +111,23 @@ async function ensureSeedData(): Promise<void> {
 }
 
 function asBusiness(business: BusinessRow) {
+  const legacyCategoryAliases: Record<string, string> = {
+    "Coffee shop": "Coffee Shops",
+    "Community garden": "Community Garden",
+    Bakery: "Bakery",
+    "Maker studio": "Artist",
+    "Food producer": "Other",
+    "Juice bar": "Restaurants",
+  };
+  const categories =
+    business.categories.length > 0
+      ? business.categories
+      : [legacyCategoryAliases[business.type] ?? business.type];
   return {
     id: business.id,
     name: business.name,
     type: business.type,
+    categories,
     address: business.address,
     neighborhood: business.neighborhood,
     wasteMaterial: business.wasteMaterial,
@@ -308,6 +326,7 @@ router.post("/businesses", async (req, res): Promise<void> => {
     .insert(businessesTable)
     .values({
       ...input,
+      type: input.categories.join(", "),
       neighborhood: "Astoria",
       initials: initialsFor(input.name),
     })
@@ -345,6 +364,7 @@ router.patch("/businesses/:businessId", async (req, res): Promise<void> => {
     .update(businessesTable)
     .set({
       ...parsedBody.data,
+      type: parsedBody.data.categories.join(", "),
       initials: initialsFor(parsedBody.data.name),
     })
     .where(eq(businessesTable.id, parsedParams.data.businessId))

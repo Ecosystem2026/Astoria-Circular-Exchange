@@ -43,6 +43,10 @@ function answerQuestion(question: string): string {
     return 'Open Business profile to update your name, type, pickup address, materials, quantity, and pickup window. Save profile to refresh your matches.';
   }
 
+  if (/(categor(y|ies)|business type|kind of business)/.test(text)) {
+    return 'When creating a business account, choose one or more categories from the list. Select Other if none fit, then type your own category. You can also update categories later in Business profile.';
+  }
+
   if (/(join|another business|sign up|add a business|test business)/.test(text)) {
     return 'Open Business profile and click Join as another business. Fill out the form and save it to add another local test profile to the exchange network.';
   }
