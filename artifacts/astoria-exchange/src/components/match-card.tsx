@@ -34,7 +34,13 @@ export function MatchCard({ match, onRequest, onCancel, pending = false, compact
       {!compact && (
         <div className="mt-4 pl-2">
           {!alwaysExpanded && <button type="button" data-testid={`button-toggle-breakdown-${match.id}`} onClick={() => setExpanded((value) => !value)} className="focus-ring font-mono-ui text-[10px] uppercase tracking-[.12em] text-muted-foreground transition-colors hover:text-foreground">
-            {expanded ? 'Hide score details' : 'See why this works'} <span className="ml-1 text-primary">{expanded ? '−' : '+'}</span>
+            {expanded ? 'Hide score details' : 
+              'See why this works: The total points are 100. They are split into four scores: 
+Material fit can get up to 40 points (shown as match.compatibilityScore = 40) 
+Amount fit can get up to 20 points (shown as match.amountScore = 20)
+Delivery time can get up to 20 points (shown as match.distanceScore = 20)
+Distance can get up to 20 points (shown as match.timingScore = 20)'} 
+            <span className="ml-1 text-primary">{expanded ? '−' : '+'}</span>
           </button>}
           {(expanded || alwaysExpanded) && (
              <div className="mt-3 grid grid-cols-2 gap-2 animate-rise-in sm:grid-cols-4">
