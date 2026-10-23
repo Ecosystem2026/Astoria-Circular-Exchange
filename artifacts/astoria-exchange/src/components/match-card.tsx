@@ -72,4 +72,9 @@ Distance can get up to 20 points (shown as match.timingScore = 20)'}
 
 function Score({ label, value, max }: { label: string; value: number; max: number }) {
   return <div className="rounded-lg bg-muted/65 px-2.5 py-2"><div className="flex justify-between font-mono-ui text-[9px] uppercase tracking-[.08em] text-muted-foreground"><span>{label}</span><span className="text-foreground">{value}/{max}</span></div><div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border"><div className="h-full rounded-full bg-primary" style={{ width: `${(value / max) * 100}%` }} /></div></div>;
+  'This makes sure that the score is between 0% to 100%.'
+  const percentage =
+  max > 0
+    ? Math.min(100, Math.max(0, (value / max) * 100))
+    : 0;
 }
