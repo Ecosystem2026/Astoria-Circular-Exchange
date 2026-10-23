@@ -17,6 +17,7 @@ export interface Business {
   wasteMaterial: string;
   wasteQuantity: string;
   wantedMaterial: string;
+  wantedQuantity: string;
   pickupWindow: string;
   initials: string;
 }

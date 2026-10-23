@@ -20,10 +20,11 @@ const profileSchema = z.object({
   wasteMaterial: z.string().min(2, 'What useful material do you have?'),
   wasteQuantity: z.string().min(1, 'A rough amount helps us match well.'),
   wantedMaterial: z.string().min(2, 'What would make your work easier?'),
+  wantedQuantity: z.string().min(1, 'How much material do you need?'),
   pickupWindow: z.string().min(2, 'Give neighbors a window for pickup.'),
 });
 type ProfileValues = z.infer<typeof profileSchema>;
-const emptyProfile: ProfileValues = { name: '', categories: [], otherBusinessType: '', address: '', wasteMaterial: '', wasteQuantity: '', wantedMaterial: '', pickupWindow: '' };
+const emptyProfile: ProfileValues = { name: '', categories: [], otherBusinessType: '', address: '', wasteMaterial: '', wasteQuantity: '', wantedMaterial: '', wantedQuantity: '', pickupWindow: '' };
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -55,6 +56,7 @@ export default function ProfilePage() {
         wasteMaterial: business.wasteMaterial,
         wasteQuantity: business.wasteQuantity,
         wantedMaterial: business.wantedMaterial,
+        wantedQuantity: business.wantedQuantity,
         pickupWindow: business.pickupWindow,
       });
     }
@@ -110,8 +112,9 @@ export default function ProfilePage() {
     { name: 'name' as const, label: 'Business name', placeholder: 'Bean & Bloom Coffee', description: 'The name shown to local partners.' },
     { name: 'address' as const, label: 'Pickup address', placeholder: '31-18 34th Street', description: 'Keep it specific enough for a neighbor to find.' },
     { name: 'wasteMaterial' as const, label: 'Material you can offer', placeholder: 'Spent coffee grounds', description: 'What is left over that someone else can use?' },
-    { name: 'wasteQuantity' as const, label: 'Typical quantity', placeholder: 'About 18 kg / week', description: 'An honest estimate beats a perfect number.' },
+    { name: 'wasteQuantity' as const, label: 'Amount you can offer', placeholder: 'About 18 kg / week', description: 'Include the unit and time period for a better amount match.' },
     { name: 'wantedMaterial' as const, label: 'Material you want', placeholder: 'Compost for the roof garden', description: 'Name the useful input you are looking for.' },
+    { name: 'wantedQuantity' as const, label: 'Amount you need', placeholder: 'About 10 kg / week', description: 'Include the unit and time period for a better amount match.' },
     { name: 'pickupWindow' as const, label: 'Pickup timing', placeholder: 'Weekdays, 2–5 pm', description: 'When can a partner collect or drop off?' },
   ], []);
 
@@ -143,7 +146,7 @@ export default function ProfilePage() {
                <div className="grid gap-5 sm:grid-cols-2">
                  <FormField control={form.control} name="categories" render={({ field: control }) => <FormItem className="sm:col-span-2"><FormLabel className="text-[11px] font-extrabold">Business categories</FormLabel><FormDescription className="text-[10px]">Choose every category that describes your work.</FormDescription><div className="mt-2 grid gap-2 sm:grid-cols-2">{BUSINESS_CATEGORIES.map((category) => <label key={category} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-[11px] font-semibold transition-colors hover:border-primary/50"><Checkbox checked={control.value.includes(category)} onCheckedChange={(checked) => control.onChange(checked ? [...control.value, category] : control.value.filter((item) => item !== category))} />{category}</label>)}</div><FormMessage className="text-[10px]" /></FormItem>} />
                  {form.watch('categories').includes('Other') && <FormField control={form.control} name="otherBusinessType" render={({ field: control }) => <FormItem className="sm:col-span-2"><FormLabel className="text-[11px] font-extrabold">Other category</FormLabel><FormControl><Input {...control} data-testid="input-profile-other-category" placeholder="Type your business category" className="mt-1 h-11 rounded-xl border-input bg-background px-3.5 text-[13px] shadow-none focus-visible:ring-primary" /></FormControl><FormMessage className="text-[10px]" /></FormItem>} />}
-                 {fields.map((field, index) => <FormField key={field.name} control={form.control} name={field.name} render={({ field: control }) => <FormItem className={index > 0 ? 'sm:col-span-2' : ''}><FormLabel className="text-[11px] font-extrabold">{field.label}</FormLabel><FormControl><Input {...control} data-testid={`input-profile-${field.name}`} placeholder={field.placeholder} className="mt-1 h-11 rounded-xl border-input bg-background px-3.5 text-[13px] shadow-none focus-visible:ring-primary" /></FormControl><FormDescription className="text-[10px]">{field.description}</FormDescription><FormMessage className="text-[10px]" /></FormItem>} />)}
+                 {fields.map((field) => <FormField key={field.name} control={form.control} name={field.name} render={({ field: control }) => <FormItem className={['name', 'wasteMaterial', 'wasteQuantity', 'wantedMaterial', 'wantedQuantity'].includes(field.name) ? '' : 'sm:col-span-2'}><FormLabel className="text-[11px] font-extrabold">{field.label}</FormLabel><FormControl><Input {...control} data-testid={`input-profile-${field.name}`} placeholder={field.placeholder} className="mt-1 h-11 rounded-xl border-input bg-background px-3.5 text-[13px] shadow-none focus-visible:ring-primary" /></FormControl><FormDescription className="text-[10px]">{field.description}</FormDescription><FormMessage className="text-[10px]" /></FormItem>} />)}
               </div>
               <div className="mt-8 flex flex-col justify-between gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center">
                 <p className="flex items-start gap-2 text-[11px] leading-relaxed text-muted-foreground"><CircleHelp size={14} className="mt-0.5 shrink-0 text-primary" /> Your exact address is only used to estimate routes.</p>
@@ -158,7 +161,7 @@ export default function ProfilePage() {
               <p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-secondary-foreground/55">Why these questions?</p>
               <h2 className="mt-3 text-[21px] font-display leading-tight">Specific beats impressive.</h2>
               <p className="mt-3 text-[12px] leading-relaxed text-secondary-foreground/70">“Some grounds” is hard to plan around. “18 kg every week, after 2 pm” gives a neighbor a real reason to say yes.</p>
-              <div className="mt-5 border-t border-secondary-foreground/15 pt-4 text-[11px] leading-relaxed text-secondary-foreground/65"><MapPin size={14} className="mb-2 text-primary" /> Astoria businesses are matched by material fit, distance, and a pickup time that respects the workday.</div>
+              <div className="mt-5 border-t border-secondary-foreground/15 pt-4 text-[11px] leading-relaxed text-secondary-foreground/65"><MapPin size={14} className="mb-2 text-primary" /> Astoria businesses are matched by material fit, amount needed, distance, and pickup time.</div>
             </div>
             {isCreating ? (
               <div className="rounded-2xl border border-card-border bg-card p-5 shadow-[var(--shadow-sm)]"><p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-primary">Test network mode</p><p className="mt-3 text-[13px] font-bold">This creates a separate local business profile.</p><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">It will appear in the match list for the Astoria pilot. No login is required in this testing version.</p></div>

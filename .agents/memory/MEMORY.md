@@ -1,1 +1,2 @@
 - [Drizzle identity inserts](drizzle-identity-inserts.md) — identity primary keys are already omitted by drizzle-zod insert schemas here.
+- [Material demand quantities](material-demand-quantities.md) — offers and requests each have amounts; amount scoring compares compatible supply with stated demand.

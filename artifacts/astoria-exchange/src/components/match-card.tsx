@@ -37,10 +37,11 @@ export function MatchCard({ match, onRequest, onCancel, pending = false, compact
             {expanded ? 'Hide score details' : 'See why this works'} <span className="ml-1 text-primary">{expanded ? '−' : '+'}</span>
           </button>}
           {(expanded || alwaysExpanded) && (
-            <div className="mt-3 grid grid-cols-3 gap-2 animate-rise-in">
-              <Score label="Material" value={match.compatibilityScore} />
-              <Score label="Distance" value={match.distanceScore} />
-              <Score label="Timing" value={match.timingScore} />
+             <div className="mt-3 grid grid-cols-2 gap-2 animate-rise-in sm:grid-cols-4">
+               <Score label="Material" value={match.compatibilityScore} max={40} />
+               <Score label="Amount" value={match.amountScore} max={20} />
+               <Score label="Distance" value={match.distanceScore} max={20} />
+               <Score label="Time" value={match.timingScore} max={20} />
             </div>
           )}
         </div>
@@ -63,6 +64,6 @@ export function MatchCard({ match, onRequest, onCancel, pending = false, compact
   );
 }
 
-function Score({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-lg bg-muted/65 px-2.5 py-2"><div className="flex justify-between font-mono-ui text-[9px] uppercase tracking-[.08em] text-muted-foreground"><span>{label}</span><span className="text-foreground">{value}%</span></div><div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border"><div className="h-full rounded-full bg-primary" style={{ width: `${value}%` }} /></div></div>;
+function Score({ label, value, max }: { label: string; value: number; max: number }) {
+  return <div className="rounded-lg bg-muted/65 px-2.5 py-2"><div className="flex justify-between font-mono-ui text-[9px] uppercase tracking-[.08em] text-muted-foreground"><span>{label}</span><span className="text-foreground">{value}/{max}</span></div><div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border"><div className="h-full rounded-full bg-primary" style={{ width: `${(value / max) * 100}%` }} /></div></div>;
 }

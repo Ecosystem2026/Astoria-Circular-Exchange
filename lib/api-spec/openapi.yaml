@@ -187,6 +187,7 @@ components:
         - wasteMaterial
         - wasteQuantity
         - wantedMaterial
+        - wantedQuantity
         - pickupWindow
         - initials
       properties:
@@ -211,6 +212,8 @@ components:
           type: string
         wantedMaterial:
           type: string
+        wantedQuantity:
+          type: string
         pickupWindow:
           type: string
         initials:
@@ -225,6 +228,7 @@ components:
         - wasteMaterial
         - wasteQuantity
         - wantedMaterial
+        - wantedQuantity
         - pickupWindow
       properties:
         name:
@@ -243,6 +247,8 @@ components:
         wasteQuantity:
           type: string
         wantedMaterial:
+          type: string
+        wantedQuantity:
           type: string
         pickupWindow:
           type: string
@@ -256,6 +262,7 @@ components:
         - wasteMaterial
         - wasteQuantity
         - wantedMaterial
+        - wantedQuantity
         - pickupWindow
       properties:
         name:
@@ -275,6 +282,8 @@ components:
           type: string
         wantedMaterial:
           type: string
+        wantedQuantity:
+          type: string
         pickupWindow:
           type: string
     Match:
@@ -284,6 +293,7 @@ components:
         - partner
         - score
         - compatibilityScore
+        - amountScore
         - distanceScore
         - timingScore
         - distance
@@ -300,6 +310,8 @@ components:
         score:
           type: integer
         compatibilityScore:
+          type: integer
+        amountScore:
           type: integer
         distanceScore:
           type: integer

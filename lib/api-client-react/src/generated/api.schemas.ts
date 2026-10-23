@@ -20,6 +20,7 @@ export interface Business {
   wasteMaterial: string;
   wasteQuantity: string;
   wantedMaterial: string;
+  wantedQuantity: string;
   pickupWindow: string;
   initials: string;
 }
@@ -33,6 +34,7 @@ export interface BusinessInput {
   wasteMaterial: string;
   wasteQuantity: string;
   wantedMaterial: string;
+  wantedQuantity: string;
   pickupWindow: string;
 }
 
@@ -45,6 +47,7 @@ export interface BusinessUpdate {
   wasteMaterial: string;
   wasteQuantity: string;
   wantedMaterial: string;
+  wantedQuantity: string;
   pickupWindow: string;
 }
 
@@ -62,6 +65,7 @@ export interface Match {
   partner: Business;
   score: number;
   compatibilityScore: number;
+  amountScore: number;
   distanceScore: number;
   timingScore: number;
   distance: string;

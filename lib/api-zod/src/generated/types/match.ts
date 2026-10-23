@@ -13,6 +13,7 @@ export interface Match {
   partner: Business;
   score: number;
   compatibilityScore: number;
+  amountScore: number;
   distanceScore: number;
   timingScore: number;
   distance: string;

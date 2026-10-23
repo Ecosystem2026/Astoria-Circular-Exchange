@@ -15,6 +15,7 @@ export const businessesTable = pgTable("businesses", {
   wasteMaterial: text("waste_material").notNull(),
   wasteQuantity: text("waste_quantity").notNull(),
   wantedMaterial: text("wanted_material").notNull(),
+  wantedQuantity: text("wanted_quantity").notNull().default(""),
   pickupWindow: text("pickup_window").notNull(),
   initials: text("initials").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })

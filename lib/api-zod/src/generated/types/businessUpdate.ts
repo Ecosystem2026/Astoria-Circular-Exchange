@@ -15,5 +15,6 @@ export interface BusinessUpdate {
   wasteMaterial: string;
   wasteQuantity: string;
   wantedMaterial: string;
+  wantedQuantity: string;
   pickupWindow: string;
 }

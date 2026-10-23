@@ -35,6 +35,7 @@ export const GetDashboardResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 }),
@@ -50,11 +51,13 @@ export const GetDashboardResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 }),
   "score": zod.number().int(),
   "compatibilityScore": zod.number().int(),
+  "amountScore": zod.number().int(),
   "distanceScore": zod.number().int(),
   "timingScore": zod.number().int(),
   "distance": zod.string(),
@@ -96,6 +99,7 @@ export const ListBusinessesResponseItem = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 })
@@ -116,6 +120,7 @@ export const CreateBusinessBody = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string()
 })
 
@@ -132,6 +137,7 @@ export const CreateBusinessResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 })
@@ -157,6 +163,7 @@ export const GetBusinessResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 })
@@ -180,6 +187,7 @@ export const UpdateBusinessBody = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string()
 })
 
@@ -196,6 +204,7 @@ export const UpdateBusinessResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 })
@@ -223,11 +232,13 @@ export const ListMatchesResponseItem = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 }),
   "score": zod.number().int(),
   "compatibilityScore": zod.number().int(),
+  "amountScore": zod.number().int(),
   "distanceScore": zod.number().int(),
   "timingScore": zod.number().int(),
   "distance": zod.string(),
@@ -266,11 +277,13 @@ export const RequestMatchResponse = zod.object({
   "wasteMaterial": zod.string(),
   "wasteQuantity": zod.string(),
   "wantedMaterial": zod.string(),
+  "wantedQuantity": zod.string(),
   "pickupWindow": zod.string(),
   "initials": zod.string()
 }),
   "score": zod.number().int(),
   "compatibilityScore": zod.number().int(),
+  "amountScore": zod.number().int(),
   "distanceScore": zod.number().int(),
   "timingScore": zod.number().int(),
   "distance": zod.string(),

@@ -30,6 +30,7 @@ const seedBusinesses = [
     wasteMaterial: "Coffee grounds",
     wasteQuantity: "45 lb / week",
     wantedMaterial: "Cardboard boxes",
+    wantedQuantity: "20 lb / week",
     pickupWindow: "Tue / Thu · mornings",
     initials: "AC",
   },
@@ -42,6 +43,7 @@ const seedBusinesses = [
     wasteMaterial: "Finished compost",
     wasteQuantity: "80 lb / week",
     wantedMaterial: "Coffee grounds",
+    wantedQuantity: "45 lb / week",
     pickupWindow: "Tue / Thu · mornings",
     initials: "GS",
   },
@@ -54,6 +56,7 @@ const seedBusinesses = [
     wasteMaterial: "Cardboard boxes",
     wasteQuantity: "60 lb / week",
     wantedMaterial: "Coffee grounds",
+    wantedQuantity: "30 lb / week",
     pickupWindow: "Tue / Thu · mornings",
     initials: "BB",
   },
@@ -66,6 +69,7 @@ const seedBusinesses = [
     wasteMaterial: "Glass jars",
     wasteQuantity: "25 lb / week",
     wantedMaterial: "Cardboard boxes",
+    wantedQuantity: "15 lb / week",
     pickupWindow: "Wed · afternoons",
     initials: "MM",
   },
@@ -78,6 +82,7 @@ const seedBusinesses = [
     wasteMaterial: "Cocoa husks",
     wasteQuantity: "35 lb / week",
     wantedMaterial: "Coffee grounds",
+    wantedQuantity: "25 lb / week",
     pickupWindow: "Fri · mornings",
     initials: "RC",
   },
@@ -133,6 +138,7 @@ function asBusiness(business: BusinessRow) {
     wasteMaterial: business.wasteMaterial,
     wasteQuantity: business.wasteQuantity,
     wantedMaterial: business.wantedMaterial,
+    wantedQuantity: business.wantedQuantity,
     pickupWindow: business.pickupWindow,
     initials: business.initials,
   };
@@ -148,6 +154,99 @@ function materialMatches(left: string, right: string): boolean {
   return rightWords.some((word) => word.length > 3 && leftWords.has(word));
 }
 
+type ParsedQuantity = {
+  amount: number;
+  unit: string;
+  period: "week" | "once";
+};
+
+function parseQuantity(value: string): ParsedQuantity | null {
+  const amountMatch = value.match(
+    /(\d+(?:\.\d+)?)(?:\s*(?:-|–|to)\s*(\d+(?:\.\d+)?))?\s*([a-zA-Z]+)?/i,
+  );
+  if (!amountMatch) return null;
+
+  const lower = Number(amountMatch[1]);
+  const upper = amountMatch[2] ? Number(amountMatch[2]) : lower;
+  const rawUnit = (amountMatch[3] ?? "unit").toLowerCase();
+  if (!Number.isFinite(lower) || !Number.isFinite(upper)) return null;
+
+  const unitAliases: Record<string, { unit: string; factor: number }> = {
+    g: { unit: "mass", factor: 1 },
+    gram: { unit: "mass", factor: 1 },
+    grams: { unit: "mass", factor: 1 },
+    kg: { unit: "mass", factor: 1000 },
+    kilogram: { unit: "mass", factor: 1000 },
+    kilograms: { unit: "mass", factor: 1000 },
+    lb: { unit: "mass", factor: 453.592 },
+    lbs: { unit: "mass", factor: 453.592 },
+    pound: { unit: "mass", factor: 453.592 },
+    pounds: { unit: "mass", factor: 453.592 },
+    oz: { unit: "mass", factor: 28.3495 },
+    ounce: { unit: "mass", factor: 28.3495 },
+    ounces: { unit: "mass", factor: 28.3495 },
+    ml: { unit: "volume", factor: 1 },
+    milliliter: { unit: "volume", factor: 1 },
+    milliliters: { unit: "volume", factor: 1 },
+    l: { unit: "volume", factor: 1000 },
+    liter: { unit: "volume", factor: 1000 },
+    liters: { unit: "volume", factor: 1000 },
+    gal: { unit: "volume", factor: 3785.41 },
+    gallon: { unit: "volume", factor: 3785.41 },
+    gallons: { unit: "volume", factor: 3785.41 },
+  };
+  const normalizedUnit = unitAliases[rawUnit] ?? {
+    unit: rawUnit
+      .replace(/ies$/, "y")
+      .replace(/((?:ch|sh|x|z|ss))es$/, "$1")
+      .replace(/s$/, ""),
+    factor: 1,
+  };
+  const periodMatch = value.match(
+    /(?:\/|per)\s*(day|daily|week|weekly|month|monthly|year|yearly)\b/i,
+  );
+  const period = periodMatch ? "week" : "once";
+  const averageAmount = (lower + upper) / 2;
+  const periodScale: Record<string, number> = {
+    day: 7,
+    daily: 7,
+    week: 1,
+    weekly: 1,
+    month: 12 / 52,
+    monthly: 12 / 52,
+    year: 1 / 52,
+    yearly: 1 / 52,
+  };
+  const amountPerWeek = periodMatch
+    ? averageAmount * (periodScale[periodMatch[1].toLowerCase()] ?? 1)
+    : averageAmount;
+
+  return {
+    amount: amountPerWeek * normalizedUnit.factor,
+    unit: normalizedUnit.unit,
+    period,
+  };
+}
+
+function amountFitScore(
+  available: string,
+  wanted: string,
+): number | null {
+  const offered = parseQuantity(available);
+  const needed = parseQuantity(wanted);
+  if (
+    !offered ||
+    !needed ||
+    offered.unit !== needed.unit ||
+    offered.period !== needed.period ||
+    needed.amount <= 0
+  ) {
+    return null;
+  }
+
+  return Math.round(Math.min(offered.amount / needed.amount, 1) * 20);
+}
+
 function distanceFor(businessId: number, partnerId: number): number {
   if (businessId === partnerId) return 0;
   const knownBusiness = distanceById[businessId] ?? 1.5;
@@ -156,10 +255,10 @@ function distanceFor(businessId: number, partnerId: number): number {
 }
 
 function distanceScore(distance: number): number {
-  if (distance <= 1.5) return 40;
-  if (distance <= 2.5) return 30;
-  if (distance <= 3.5) return 20;
-  if (distance <= 4.5) return 10;
+  if (distance <= 1.5) return 20;
+  if (distance <= 2.5) return 15;
+  if (distance <= 3.5) return 10;
+  if (distance <= 4.5) return 5;
   return 0;
 }
 
@@ -204,12 +303,34 @@ async function rankedMatches(business: BusinessRow) {
         partner.wasteMaterial,
         business.wantedMaterial,
       );
-      const compatibilityPoints =
+      const materialFitPoints =
         outgoingCompatibility && incomingCompatibility
           ? 40
           : outgoingCompatibility || incomingCompatibility
             ? 30
             : 0;
+      const amountFitPoints = (() => {
+        const directionalScores: number[] = [];
+        if (outgoingCompatibility) {
+          const score = amountFitScore(
+            business.wasteQuantity,
+            partner.wantedQuantity,
+          );
+          if (score !== null) directionalScores.push(score);
+        }
+        if (incomingCompatibility) {
+          const score = amountFitScore(
+            partner.wasteQuantity,
+            business.wantedQuantity,
+          );
+          if (score !== null) directionalScores.push(score);
+        }
+        if (directionalScores.length === 0) return 0;
+        return Math.round(
+          directionalScores.reduce((sum, score) => sum + score, 0) /
+            directionalScores.length,
+        );
+      })();
       const distance = distanceFor(business.id, partner.id);
       const timingPoints = timingScore(
         business.pickupWindow,
@@ -221,8 +342,13 @@ async function rankedMatches(business: BusinessRow) {
       return {
         id,
         partner: asBusiness(partner),
-        score: compatibilityPoints + distanceScore(distance) + timingPoints,
-        compatibilityScore: compatibilityPoints,
+        score:
+          materialFitPoints +
+          amountFitPoints +
+          distanceScore(distance) +
+          timingPoints,
+        compatibilityScore: materialFitPoints,
+        amountScore: amountFitPoints,
         distanceScore: distanceScore(distance),
         timingScore: timingPoints,
         distance: `${distance.toFixed(1)} mi`,
