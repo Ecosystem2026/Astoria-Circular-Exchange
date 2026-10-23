@@ -261,7 +261,22 @@ function distanceScore(distance: number): number {
   if (distance <= 4.5) return 5;
   return 0;
 }
+// It accepts identical descriptions and rejects everything else.
+function timingScore(left: string, right: string): number {
+  // Compare pickup schedules.
+  const leftNormalized = normalized(left);
+  const rightNormalized = normalized(right);
 
+  // Identical schedules receive full points.
+  if (leftNormalized === rightNormalized) {
+    return 20;
+  }
+
+  // No confirmed schedule overlap.
+  return 0;
+}
+
+/* DELETED - 
 function timingScore(left: string, right: string): number {
   const leftNormalized = normalized(left);
   const rightNormalized = normalized(right);
@@ -280,7 +295,7 @@ function timingScore(left: string, right: string): number {
   }
   return 8;
 }
-
+*/
 async function rankedMatches(business: BusinessRow) {
   const partners = await db
     .select()
@@ -363,6 +378,12 @@ async function rankedMatches(business: BusinessRow) {
         status: request?.status === "confirmed" ? "confirmed" : request ? "requested" : "available",
       };
     })
+
+    // When timing does not match, there is no match.
+    // When distance is too high and receives zero score, there is no mathc.
+    .filter((match) => match.timingScore > 0)
+    .filter((match) => match.distanceScore > 0)
+    .filter((match) => match.compatibilityScore > 0)
     .sort((a, b) => b.score - a.score);
 }
 
