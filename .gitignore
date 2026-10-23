@@ -47,3 +47,28 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# ADDED FOR SECURITY
+# Environment variables and private credentials
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Additional logs
+*.log
+
+# Local development secrets
+.secrets/
+secrets/
