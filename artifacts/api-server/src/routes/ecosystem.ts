@@ -379,11 +379,15 @@ async function rankedMatches(business: BusinessRow) {
       };
     })
 
-    // When timing does not match, there is no match.
-    // When distance is too high and receives zero score, there is no mathc.
-    .filter((match) => match.timingScore > 0)
-    .filter((match) => match.distanceScore > 0)
-    .filter((match) => match.compatibilityScore > 0)
+    // Only show matches with compatible materials,
+    // quantities, distance, and pickup schedules.
+    .filter(
+      (match) =>
+        match.timingScore > 0 &&
+        match.amountScore > 0 &&
+        match.distanceScore > 0 &&
+        match.compatibilityScore > 0
+    )
     .sort((a, b) => b.score - a.score);
 }
 
