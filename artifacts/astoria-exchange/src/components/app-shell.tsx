@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Show, SignOutButton } from '@clerk/react';
 import { Link, useLocation } from 'wouter';
-import { getHealthCheckQueryKey, useHealthCheck } from '@workspace/api-client-react';
+import { getHealthCheckQueryKey, useHealthCheck, useGetDashboard } from '@workspace/api-client-react';
 import { ArrowRight, CircleUserRound, LayoutDashboard, Menu, Network, X } from 'lucide-react';
 
 const navItems = [
@@ -14,6 +14,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
   const health = useHealthCheck({ query: { staleTime: 30000, queryKey: getHealthCheckQueryKey() } });
+    const dashboard = useGetDashboard({
+    query: { staleTime: 20000, retry: false },
+  });
+
+  const profileName = dashboard.data?.currentBusiness?.name ?? 'Your profile';
+
+  const profileInitials = profileName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join('');
   const activeLabel = navItems.find((item) => item.href === location)?.label ?? 'Overview';
 
   return (
@@ -76,10 +88,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <button type="button" data-testid="button-sign-out" className="focus-ring rounded-full border border-border bg-card px-3 py-2 text-[11px] font-extrabold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">Sign out</button>
               </SignOutButton>
             </Show>
-            <Link href="/profile" data-testid="link-header-profile" className="focus-ring flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5 text-[11px] font-bold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">
-              <span className="grid size-6 place-items-center rounded-full bg-accent text-[10px] font-extrabold text-accent-foreground">BC</span>
-              <span className="hidden sm:inline">Bean &amp; Bloom</span>
-            </Link>
+<Link href="/profile" data-testid="link-header-profile" className="focus-ring flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5 text-[11px] font-bold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">
+  <span className="grid size-6 place-items-center rounded-full bg-accent text-[10px] font-extrabold text-accent-foreground">
+    {profileInitials}
+  </span>
+  <span className="hidden sm:inline">{profileName}</span>
+</Link>
           </div>
         </header>
         {children}
