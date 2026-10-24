@@ -5,7 +5,7 @@ import { ActivityKind, getGetDashboardQueryKey, useCancelMatchRequest, useGetDas
 import { ArrowRight, CalendarDays, CheckCircle2, Leaf, MapPinned, PackageCheck, RefreshCw, Sparkles } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { MatchCard } from '@/components/match-card';
-
+import { demoMatches } from '@/demo-matches';
 export default function DashboardPage() {
   const queryClient = useQueryClient();
   const dashboard = useGetDashboard({ query: { staleTime: 20000, queryKey: getGetDashboardQueryKey() } });
@@ -13,7 +13,9 @@ export default function DashboardPage() {
   const cancelMatchRequest = useCancelMatchRequest();
   const [requestedIds, setRequestedIds] = useState<number[]>([]);
   const [pendingId, setPendingId] = useState<number | null>(null);
-
+const realMatches = dashboard.data?.matches ?? [];
+const isDemo = dashboard.isSuccess && realMatches.length === 0;
+const displayMatches = isDemo ? demoMatches : realMatches;
   const request = (matchId: number) => {
     setPendingId(matchId);
     requestMatch.mutate({ matchId, data: {} }, {
@@ -48,7 +50,14 @@ export default function DashboardPage() {
             <section className="animate-rise-in">
               <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
                 <div>
-                  <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">Tuesday, October 8 · Your exchange desk</p>
+                 <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">
+  {new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })} · Your exchange desk
+</p>
+                  
                   <h1 data-testid="text-dashboard-heading" className="mt-3 max-w-[680px] text-balance font-display text-[42px] leading-[.98] tracking-[-.035em] text-foreground sm:text-[58px]">Good morning, {firstName(dashboard.data.currentBusiness.name)}.</h1>
    <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-muted-foreground">
   Here’s what’s moving around the neighborhood today.
@@ -74,13 +83,40 @@ export default function DashboardPage() {
                     <p className="font-mono-ui text-[10px] uppercase tracking-[.17em] text-primary">Ranked for your shop</p>
                     <h2 className="mt-1.5 text-[21px] font-extrabold tracking-[-.03em]">Strongest matches</h2>
                   </div>
-                  <span className="font-mono-ui text-[10px] text-muted-foreground">{dashboard.data.matches.length} nearby leads</span>
+                  <span className="font-mono-ui text-[10px] text-muted-foreground">{displayMatches.length} {isDemo ? 'demo examples' : 'nearby leads'}</span>
                 </div>
                 <div className="space-y-3">
-                  {dashboard.data.matches.slice(0, 3).map((match) => (
-                    <MatchCard key={match.id} match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} onCancel={() => cancel(match.id)} pending={pendingId === match.id} />
-                  ))}
-                  {dashboard.data.matches.length === 0 && <EmptyMatches />}
+                  {isDemo && (
+  <p className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-[12px]">
+    <strong>Demo Mode:</strong> Fictional example partners and
+    illustrative scores. No real pickups are arranged.
+  </p>
+)}
+                {displayMatches.slice(0, 3).map((match) => (
+                    <MatchCard
+  key={match.id}
+  match={
+    requestedIds.includes(match.id)
+      ? { ...match, status: 'requested' }
+      : match
+  }
+  onRequest={() => {
+    if (isDemo) {
+      setRequestedIds((ids) => [...ids, match.id]);
+    } else {
+      request(match.id);
+    }
+  }}
+  onCancel={() => {
+    if (isDemo) {
+      setRequestedIds((ids) => ids.filter((id) => id !== match.id));
+    } else {
+      cancel(match.id);
+    }
+  }}
+  pending={pendingId === match.id}
+/>                  ))}
+              {displayMatches.length === 0 && <EmptyMatches />}
                 </div>
               </section>
 
