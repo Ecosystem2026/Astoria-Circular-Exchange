@@ -346,6 +346,18 @@ async function rankedMatches(business: BusinessRow) {
             directionalScores.length,
         );
       })();
+//temp
+      console.log("MATCH DEBUG", {
+  business: business.name,
+  partner: partner.name,
+  outgoingCompatibility,
+  incomingCompatibility,
+  amountFitPoints,
+  wasteQuantity: business.wasteQuantity,
+  partnerWantedQuantity: partner.wantedQuantity,
+  partnerWasteQuantity: partner.wasteQuantity,
+  businessWantedQuantity: business.wantedQuantity,
+});
       const distance = distanceFor(business.id, partner.id);
       const timingPoints = timingScore(
         business.pickupWindow,
