@@ -403,6 +403,7 @@ async function rankedMatches(business: BusinessRow) {
 .sort((a, b) => b.score - a.score);
 }
 
+/*
 async function currentBusiness(): Promise<BusinessRow> {
   await ensureSeedData();
   const [business] = await db
@@ -415,9 +416,36 @@ async function currentBusiness(): Promise<BusinessRow> {
   }
   return business;
 }
+*/
+async function currentBusiness(
+  userId: string
+): Promise<BusinessRow | null> {
+  const [business] = await db
+    .select()
+    .from(businessesTable)
+    .where(eq(businessesTable.clerkUserId, userId))
+    .limit(1);
 
-router.get("/dashboard", async (_req, res): Promise<void> => {
-  const business = await currentBusiness();
+  return business ?? null;
+}
+
+router.get("/dashboard", async (req, res): Promise<void> => {
+  const userId = getAuth(req).userId;
+
+  if (!userId) {
+    res.status(401).json({ error: "Please sign in." });
+    return;
+  }
+
+  const business = await currentBusiness(userId);
+
+  if (!business) {
+    res.status(404).json({
+      error: "No profile found. Please create your profile."
+    });
+    return;
+  }
+
   const matches = await rankedMatches(business);
   const businesses = await db.select().from(businessesTable);
   const requested = matches.filter((match) => match.status !== "available");
@@ -477,26 +505,57 @@ router.get("/businesses", async (_req, res): Promise<void> => {
   res.json(ListBusinessesResponse.parse(businesses.map(asBusiness)));
 });
 
-router.post("/businesses", async (req, res): Promise<void> => {
+
+  router.post("/businesses", async (req, res): Promise<void> => {
+  const userId = getAuth(req).userId;
+
+  if (!userId) {
+    res.status(401).json({
+      error: "Please sign in to create a profile."
+    });
+    return;
+  }
+
   const parsed = CreateBusinessBody.safeParse(req.body);
+
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+    res.status(400).json({
+      error: parsed.error.message
+    });
+    return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(businessesTable)
+    .where(eq(businessesTable.clerkUserId, userId))
+    .limit(1);
+
+  if (existing) {
+    res.status(409).json({
+      error: "You already have a profile. Please edit your existing profile."
+    });
     return;
   }
 
   const input = parsed.data;
+
   const [business] = await db
     .insert(businessesTable)
     .values({
       ...input,
+      clerkUserId: userId,
       type: input.categories.join(", "),
       neighborhood: "Astoria",
       initials: initialsFor(input.name),
     })
     .returning();
 
-  res.status(201).json(CreateBusinessResponse.parse(asBusiness(business)));
+  res.status(201).json(
+    CreateBusinessResponse.parse(asBusiness(business))
+  );
 });
+
 
 router.get("/businesses/:businessId", async (req, res): Promise<void> => {
   const parsed = GetBusinessParams.safeParse(req.params);
@@ -516,8 +575,16 @@ router.get("/businesses/:businessId", async (req, res): Promise<void> => {
 });
 
 router.patch("/businesses/:businessId", async (req, res): Promise<void> => {
+  const userId = getAuth(req).userId;
+
+  if (!userId) {
+    res.status(401).json({ error: "Please sign in." });
+    return;
+  }
+
   const parsedParams = UpdateBusinessParams.safeParse(req.params);
   const parsedBody = UpdateBusinessBody.safeParse(req.body);
+
   if (!parsedParams.success || !parsedBody.success) {
     res.status(400).json({ error: "Invalid business profile" });
     return;
@@ -530,12 +597,21 @@ router.patch("/businesses/:businessId", async (req, res): Promise<void> => {
       type: parsedBody.data.categories.join(", "),
       initials: initialsFor(parsedBody.data.name),
     })
-    .where(eq(businessesTable.id, parsedParams.data.businessId))
+    .where(
+      and(
+        eq(businessesTable.id, parsedParams.data.businessId),
+        eq(businessesTable.clerkUserId, userId)
+      )
+    )
     .returning();
+
   if (!business) {
-    res.status(404).json({ error: "Business not found" });
+    res.status(404).json({
+      error: "Profile not found or access denied."
+    });
     return;
   }
+
   res.json(UpdateBusinessResponse.parse(asBusiness(business)));
 });
 
@@ -560,6 +636,13 @@ router.get(
 );
 
 router.post("/matches/:matchId/request", async (req, res): Promise<void> => {
+  const userId = getAuth(req).userId;
+
+  if (!userId) {
+    res.status(401).json({ error: "Please sign in." });
+    return;
+  }
+
   const parsedParams = RequestMatchParams.safeParse(req.params);
   const parsedBody = RequestMatchBody.safeParse(req.body ?? {});
   if (!parsedParams.success || !parsedBody.success) {
@@ -573,7 +656,13 @@ router.post("/matches/:matchId/request", async (req, res): Promise<void> => {
   const [business] = await db
     .select()
     .from(businessesTable)
-    .where(eq(businessesTable.id, businessId));
+
+    .where(
+  and(
+    eq(businessesTable.id, businessId),
+    eq(businessesTable.clerkUserId, userId)
+  )
+);
   const [partner] = await db
     .select()
     .from(businessesTable)
@@ -614,7 +703,15 @@ router.post("/matches/:matchId/request", async (req, res): Promise<void> => {
 });
 
 router.delete("/matches/:matchId/request", async (req, res): Promise<void> => {
+  const userId = getAuth(req).userId;
+
+  if (!userId) {
+    res.status(401).json({ error: "Please sign in." });
+    return;
+  }
+
   const parsedParams = RequestMatchParams.safeParse(req.params);
+
   if (!parsedParams.success) {
     res.status(400).json({ error: "Invalid match request" });
     return;
@@ -623,13 +720,23 @@ router.delete("/matches/:matchId/request", async (req, res): Promise<void> => {
   const matchId = parsedParams.data.matchId;
   const businessId = Math.floor(matchId / 1000);
   const partnerId = matchId % 1000;
+
+  const business = await currentBusiness(userId);
+
+  if (!business || business.id !== businessId) {
+    res.status(403).json({
+      error: "You cannot cancel another user's pickup request."
+    });
+    return;
+  }
+
   const [deleted] = await db
     .delete(matchRequestsTable)
     .where(
       and(
         eq(matchRequestsTable.businessId, businessId),
-        eq(matchRequestsTable.partnerId, partnerId),
-      ),
+        eq(matchRequestsTable.partnerId, partnerId)
+      )
     )
     .returning({ id: matchRequestsTable.id });
 
@@ -641,4 +748,5 @@ router.delete("/matches/:matchId/request", async (req, res): Promise<void> => {
   res.sendStatus(204);
 });
 
+  
 export default router;
