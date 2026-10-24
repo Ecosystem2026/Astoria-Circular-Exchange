@@ -1,0 +1,14 @@
+Contributing to Astoria Circular Exchange
+My Contribution
+Astoria Circular Exchange is a student-led project created by me, Emma P.O., with assistance from Replit and ChatGPT.  I came up with the project idea, guided Replit, reviewed the code, identified problems, worked on fixing them, tested changes, and made improvements.
+About the Project
+I created the Astoria Circular Exchange app to help local businesses in Astoria reduce waste by exchanging reusable materials. What if we could make Astoria's businesses work like an ecosystem, where one business's waste becomes another business's resource?
+I read about this issue and learned that NYC has a significant waste problem. According to Newsday (2024), NYC throws away about 44 million pounds of waste every day. About half of this waste comes from businesses, which must also pay to dispose of it. This is a problem for NYC residents who have to deal with this waste, the environment that is polluted, and businesses who have to pay to take waste away. My app aims to bring local businesses together so they can exchange useful materials instead of throwing them away.
+I also created the matching criteria. Four things matter: material compatibility, quantity, distance, and pickup times. I reviewed and modified the matching algorithm to calculate matching scores and exclude businesses when their materials, pickup schedules, or distances are incompatible.
+For example, I realized that even when two businesses have and want the same materials and are very close to each other, they should not be matched if their pickup schedules are different. I worked on changing the algorithm to prevent these incorrect matches.
+I used Replit to help generate the code for my app and ChatGPT to help me understand the code and evaluate problems I identified myself. I explored possible solutions with ChatGPT, decided what changes to make, and worked on editing, testing, and improving the code. I am still learning programming and keep improving my app.
+How Can You Contribute?
+You are welcome to contribute to this project! The matching algorithm can be improved, new features can be added, and the app could be used in other neighborhoods.
+Licensing
+Contributions to this project should be made under the same MIT License as the project.
+Thank you for helping improve Astoria Circular Exchange!
