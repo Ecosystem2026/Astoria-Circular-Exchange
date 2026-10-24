@@ -391,16 +391,15 @@ async function rankedMatches(business: BusinessRow) {
       };
     })
 
-    // Only show matches with compatible materials,
-    // quantities, distance, and pickup schedules.
-    .filter(
-      (match) =>
-        match.timingScore > 0 &&
-        match.amountScore > 0 &&
-        match.distanceScore > 0 &&
-        match.compatibilityScore > 0
-    )
-    .sort((a, b) => b.score - a.score);
+    
+// Show matches with same materials and a quantity score greater than zero.
+// Distance and timing have an impact on the ranking only.
+.filter(
+  (match) =>
+    match.compatibilityScore > 0 &&
+    match.amountScore > 0
+)
+.sort((a, b) => b.score - a.score);
 }
 
 async function currentBusiness(): Promise<BusinessRow> {
