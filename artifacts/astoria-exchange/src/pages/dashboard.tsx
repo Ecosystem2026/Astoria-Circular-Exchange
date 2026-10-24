@@ -50,7 +50,11 @@ export default function DashboardPage() {
                 <div>
                   <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">Tuesday, October 8 · Your exchange desk</p>
                   <h1 data-testid="text-dashboard-heading" className="mt-3 max-w-[680px] text-balance font-display text-[42px] leading-[.98] tracking-[-.035em] text-foreground sm:text-[58px]">Good morning, {firstName(dashboard.data.currentBusiness.name)}.</h1>
-                  <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-muted-foreground">Here’s what’s moving around the neighborhood today. Your coffee grounds have somewhere useful to go.</p>
+   <p className="mt-4 max-w-[560px] text-[14px] leading-relaxed text-muted-foreground">
+  Here’s what’s moving around the neighborhood today.
+  You’re offering {dashboard.data.currentBusiness.wasteMaterial}
+  and looking for {dashboard.data.currentBusiness.wantedMaterial}.
+</p>
                 </div>
                 <Link href="/matches" data-testid="link-view-all-matches" className="focus-ring inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-[12px] font-extrabold transition-all hover:-translate-y-0.5 hover:border-primary/55 hover:shadow-[var(--shadow-sm)]">View all matches <ArrowRight size={14} /></Link>
               </div>
