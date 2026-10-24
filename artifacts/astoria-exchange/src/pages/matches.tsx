@@ -4,7 +4,7 @@ import { getGetDashboardQueryKey, getListMatchesQueryKey, useCancelMatchRequest,
 import { ArrowDownUp, Filter, RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { MatchCard } from '@/components/match-card';
-
+import { demoMatches } from '@/demo-matches';
 export default function MatchesPage() {
   const queryClient = useQueryClient();
   const dashboard = useGetDashboard({ query: { staleTime: 20000, queryKey: getGetDashboardQueryKey() } });
@@ -18,7 +18,14 @@ export default function MatchesPage() {
   const [sortHigh, setSortHigh] = useState(true);
   const [filter, setFilter] = useState<'all' | 'available' | 'requested'>('all');
 
-  const allMatches = matches.data ?? dashboard.data?.matches ?? [];
+ const realMatches = matches.data ?? dashboard.data?.matches ?? [];
+
+  const isDemo =
+    dashboard.isSuccess &&
+    matches.isSuccess &&
+    realMatches.length === 0;
+
+  const allMatches = isDemo ? demoMatches : realMatches;
   const visibleMatches = allMatches
     .filter((match) => filter === 'all' || (filter === 'requested' ? requestedIds.includes(match.id) || match.status !== 'available' : match.status === 'available'))
     .filter((match) => `${match.partner.name} ${match.material} ${match.partner.neighborhood}`.toLowerCase().includes(query.toLowerCase()))
@@ -78,8 +85,45 @@ export default function MatchesPage() {
         {(matches.isError || dashboard.isError) && <div className="mt-6"><ErrorMatches onRetry={() => void matches.refetch()} /></div>}
         {!matches.isLoading && !matches.isError && (
           <div className="mt-6 grid gap-3 lg:grid-cols-2">
-            {visibleMatches.map((match, index) => <div key={match.id} className={`animate-rise-in delay-${Math.min(index + 1, 4)}`}><MatchCard alwaysExpanded match={requestedIds.includes(match.id) ? { ...match, status: 'requested' } : match} onRequest={() => request(match.id)} onCancel={() => cancel(match.id)} pending={pendingId === match.id} /></div>)}
-            {visibleMatches.length === 0 && <EmptyState query={query} onClear={() => { setQuery(''); setFilter('all'); }} />}
+
+        {isDemo && (
+  <div className="lg:col-span-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-[12px]">
+    <strong>Demo Mode:</strong> These are fictional example partners
+    with illustrative compatibility scores. No real pickups are being arranged.
+  </div>
+)}
+
+{visibleMatches.map((match, index) => (
+  <div
+    key={match.id}
+    className={`animate-rise-in delay-${Math.min(index + 1, 4)}`}
+  >
+    <MatchCard
+      alwaysExpanded
+      match={
+        requestedIds.includes(match.id)
+          ? { ...match, status: 'requested' }
+          : match
+      }
+      onRequest={() => {
+        if (isDemo) {
+          setRequestedIds((ids) => [...ids, match.id]);
+        } else {
+          request(match.id);
+        }
+      }}
+      onCancel={() => {
+        if (isDemo) {
+          setRequestedIds((ids) => ids.filter((id) => id !== match.id));
+        } else {
+          cancel(match.id);
+        }
+      }}
+      pending={pendingId === match.id}
+    />
+  </div>
+))}
+        {visibleMatches.length === 0 && <EmptyState query={query} onClear={() => { setQuery(''); setFilter('all'); }} />}
           </div>
         )}
       </div>
