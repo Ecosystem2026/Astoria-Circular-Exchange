@@ -2,8 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Show, SignOutButton } from '@clerk/react';
 import { Link, useLocation } from 'wouter';
 import { getHealthCheckQueryKey, useHealthCheck, useGetDashboard } from '@workspace/api-client-react';
-import { ArrowRight, CircleUserRound, LayoutDashboard, Menu, Network, X } from 'lucide-react';
-
+import { ArrowRight, CircleUserRound, Github, LayoutDashboard, Menu, Network, X } from 'lucide-react';
 const navItems = [
   { href: '/', label: 'Overview', icon: LayoutDashboard },
   { href: '/matches', label: 'Your matches', icon: Network },
@@ -80,6 +79,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <a
+  href="https://github.com/Ecosystem2026/Astoria-Circular-Exchange"
+  target="_blank"
+  rel="noopener noreferrer"
+  title="View Open Source Code on GitHub"
+  className="focus-ring flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground"
+>
+  <Github size={17} />
+  <span className="hidden sm:inline">Open Source</span>
+</a>
             <Show when="signed-out">
               <Link href="/sign-up" data-testid="link-create-account" className="focus-ring rounded-full border border-border bg-card px-3 py-2 text-[11px] font-extrabold text-foreground/75 transition-colors hover:border-primary/50 hover:text-foreground">Create account</Link>
             </Show>
